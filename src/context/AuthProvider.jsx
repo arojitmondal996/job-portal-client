@@ -2,6 +2,7 @@ import { createUserWithEmailAndPassword, GoogleAuthProvider, onAuthStateChanged,
 import React, { useEffect, useState } from 'react';
 import AuthContext from './Authcontext';
 import auth from '../firebase/firebase.init';
+import axios from 'axios';
 const googleProvider = new GoogleAuthProvider
 const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
@@ -37,7 +38,26 @@ const AuthProvider = ({ children }) => {
         const unsubscribe = onAuthStateChanged(auth, currentUser => {
             // user jodi nao thake tahole null hisebe amra set korbo
             setUser(currentUser);
-            console.log('state captured', currentUser);
+            console.log('state captured', currentUser?.email);
+            if(currentUser?.email){
+                const user = { email: createUser.email };
+            axios.post('http://localhost:5000/jwt', user, 
+                {withCredentials: true})
+                .then(res => {
+                    console.log('login token', res.data);
+                    setLoading(false);
+                })
+            }
+            else {
+                axios.post('http://localhost:5000/logout', {},{
+                    withCredentials: true
+                })
+                .then(res => {
+                    console.log('logout', res.data);
+                    setLoading(false);
+                })
+            }
+                // put it in the right place
             setLoading(false);
         })
         // unsubscribe use korci karon ami ekhan theke cole gele jate memory ta hold kore na rakhe eajonno
